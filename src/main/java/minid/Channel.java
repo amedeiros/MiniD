@@ -1,5 +1,6 @@
 package minid;
 
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -19,7 +20,7 @@ public class Channel {
     public void setName(String name) { this.name = name; }
     public String getName() { return name; }
 
-    public boolean containsMember(String memeber) { return members.containsKey(memeber); }
+    public boolean containsMember(String member) { return members.containsKey(member); }
 
     public void addMember(Connection connection) {
         members.put(connection.getUserConfig().getNick(), connection);
@@ -30,9 +31,9 @@ public class Channel {
 
     public void sendTopic(Connection connection) {
         if (getTopic() == null)
-            connection.send("332 " + connection.getUserConfig().getNick() +  " " + name + " :No topic is set");
+            connection.send(String.format("352 %s %s :No topic is set", connection.getUserConfig().getNick(), name));
         else
-            connection.send("332 " + connection.getUserConfig().getNick() + " " + name + " :" + topic);
+            connection.send(String.format("352 %s %s :%s", connection.getUserConfig().getNick(), name, topic));
     }
 
     public void msgMembers(String message, Connection userTalking) {
@@ -47,8 +48,10 @@ public class Channel {
     }
 
     public void doList(Connection connection) {
-        for (Connection channelMember : members.values())
-            connection.send("353 " + connection.getUserConfig().getNick() + " = " + name + " :" + channelMember.getUserConfig().getNick());
+        Iterator iterator = members.keySet().iterator();
+        String nick = connection.getUserConfig().getNick();
+        while (iterator.hasNext())
+            connection.send(String.format("353 %s = %s :%s", nick, name, iterator.next()));
 
         connection.send("366 " + connection.getUserConfig().getNick() + " " + name + " :End of /NAMES list");
     }

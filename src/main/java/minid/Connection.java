@@ -1,6 +1,8 @@
 package minid;
 
 import minid.configuration.UserConfig;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.net.Socket;
@@ -18,6 +20,7 @@ public class Connection implements Runnable {
     private BufferedWriter bufferedWriter;
     private BufferedReader bufferedReader;
 
+    private static final Logger LOG = LogManager.getLogger(Server.class);
     private static ConcurrentHashMap<String, Connection> globalConnections = new ConcurrentHashMap<>();
     public static String globalServerName = "Programming-Mother-Fucker";
 
@@ -49,7 +52,7 @@ public class Connection implements Runnable {
             try {
                 String line = bufferedReader.readLine();
                 if (!line.isEmpty()) parse(line);
-            } catch (IOException e) { e.printStackTrace(); }
+            } catch (IOException e) { break; }
         }
 
         close();
@@ -99,9 +102,7 @@ public class Connection implements Runnable {
             bufferedWriter.write(message + "\r\n");
             bufferedWriter.flush();
             System.out.println(">> " + message);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) { LOG.debug(e); }
     }
 
     /**
@@ -142,6 +143,7 @@ public class Connection implements Runnable {
         else if (line.startsWith("VERSION")) Commands.VERSION.run(this, arguments);
         else if (line.startsWith("TOPIC"))   Commands.TOPIC.run(this, arguments);
         else if (line.startsWith("PONG"))    Commands.PONG.run(this, arguments);
+        else if (line.startsWith("NAMES"))   Commands.NAMES.run(this, arguments);
         else Commands.UNKNOWNCOMMAND.run(this, arguments);
     }
 }

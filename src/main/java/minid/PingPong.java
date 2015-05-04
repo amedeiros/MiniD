@@ -14,8 +14,8 @@ public class PingPong implements Runnable {
             try {
                 connection.send("PING 0");
                 TimeUnit.SECONDS.sleep(30);
-            } catch (InterruptedException e){
-                e.printStackTrace();
+            } catch (InterruptedException e) {
+                // NO-OP
             } finally {
                 if (!connection.isPlayingPingPong) {
                     connection.close();

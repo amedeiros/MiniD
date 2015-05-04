@@ -50,9 +50,7 @@ public enum Commands implements Command {
 
     QUIT() {
         @Override
-        public void run(Connection connection, String[] arguments) {
-            connection.close();
-        }
+        public void run(Connection connection, String[] arguments) { connection.close(); }
     },
 
     WHOIS() {
@@ -65,7 +63,7 @@ public enum Commands implements Command {
                         whoIsConnection.getUserConfig().getNick() + " " +
                         whoIsConnection.getUserConfig().getUsername() + " :" + whoIsConnection.getHost());
             } else {
-                connection.send("401 " + nick + " :No such nick/channel");
+                connection.noSuchNickChannel();
             }
         }
     },
@@ -84,7 +82,7 @@ public enum Commands implements Command {
                         connection.sendNotice("You can not send messages to a channel you are not a member of.");
                     }
                 } else {
-                    connection.send("401 " + target + " :No such nick/channel");
+                    connection.noSuchNickChannel();
                 }
             } else {
                 connection.send("412 :No text to send");
@@ -106,10 +104,11 @@ public enum Commands implements Command {
             if (channelName.startsWith("#")) {
                 if (Channel.getGlobalChannels().containsKey(channelName)) {
                     Channel channel = Channel.getGlobalChannels().get(channelName);
-                    if (channel.containsMember(connection.getUserConfig().getNick())) {
+                    if (channel.containsMember(connection.getUserConfig().getNick()) && connection.getUserConfig().getChannelList().contains(channelName)) {
                         connection.sendNotice("You are already a member of that channel.");
                     } else {
                         channel.addMember(connection);
+                        connection.getUserConfig().getChannelList().add(channelName);
                     }
                 } else {
                     Channel newChannel = new Channel();
@@ -128,7 +127,7 @@ public enum Commands implements Command {
             if (Channel.getGlobalChannels().containsKey(channel))
                 connection.sendGlobal("MODE " + Channel.getGlobalChannels().get(channel).getName() + " +nt");
             else
-                connection.send("401 " + connection.getUserConfig().getNick() + " :No such nick/channel");
+                connection.noSuchNickChannel();
         }
     },
 
@@ -154,15 +153,26 @@ public enum Commands implements Command {
                     channel.msgMembers(":" + connection.getRepresentation() + " TOPIC " + channel.getName() + " :" + channel.getTopic());
                 }
             } else {
-                connection.send("401 " + connection.getUserConfig().getNick() + " :No such nick/channel");
+                connection.noSuchNickChannel();
             }
         }
     },
 
     PONG() {
         @Override
+        public void run(Connection connection, String[] arguments) { connection.isPlayingPingPong = true; }
+    },
+
+    NAMES() {
+        @Override
         public void run(Connection connection, String[] arguments) {
-            connection.isPlayingPingPong = true;
+            if (arguments.length == 2) {
+                String channelName = arguments[1];
+                if (Channel.getGlobalChannels().containsKey(channelName))
+                    Channel.getGlobalChannels().get(channelName).doList(connection);
+                else
+                    connection.noSuchNickChannel();
+            } else { connection.noSuchNickChannel(); }
         }
     }
 }
