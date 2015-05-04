@@ -21,6 +21,9 @@ public class Connection implements Runnable {
     private static ConcurrentHashMap<String, Connection> globalConnections = new ConcurrentHashMap<>();
     public static String globalServerName = "Programming-Mother-Fucker";
 
+    /**
+     * @param socket Socket to run in a separate thread
+     */
     public Connection(Socket socket) {
         try {
             this.socket = socket;
@@ -29,8 +32,14 @@ public class Connection implements Runnable {
         } catch (IOException e) { e.printStackTrace(); }
     }
 
+    /**
+     * @return ConncurrentHashMap of all the connections connected to this server.
+     */
     public static ConcurrentHashMap<String, Connection> getGlobalConnections() { return globalConnections; }
 
+    /**
+     * Run this connection thread
+     */
     public void run() {
         // Also run a ping thread probably a better way to do this.
         this.pingPongThread = new Thread(new PingPong(this));
@@ -46,22 +55,45 @@ public class Connection implements Runnable {
         close();
     }
 
+    /**
+     * Active if the socket is connected and the client is responding to ping requests.
+     * @return
+     */
     public boolean  active() { return socket.isConnected() && isPlayingPingPong; }
 
+    /**
+     * @return Return the users configuration
+     */
     public UserConfig getUserConfig() { return userConfig; }
 
+    /**
+     * Get the connections host
+     * @return String hostname
+     */
     public String getHost() { return socket.getLocalAddress().getCanonicalHostName(); }
 
+    /**
+     * Part all channels
+     * Remove connection from global connection
+     * Interrupt the Ping Pong thread
+     * Close the buffered writer and reader
+     * Finally close the socket
+     */
     public void close() {
         try {
+            userConfig.partAllChannels();
+            globalConnections.remove(userConfig.getNick());
+            pingPongThread.interrupt();
             bufferedWriter.close();
             bufferedReader.close();
             socket.close();
-            globalConnections.remove(userConfig.getNick());
-            pingPongThread.interrupt();
         } catch (IOException e) { e.printStackTrace(); }
     }
 
+    /**
+     * Send a message to the client
+     * @param message String message to send to the client
+     */
     public void send(String message) {
         try {
             bufferedWriter.write(message + "\r\n");
@@ -72,17 +104,31 @@ public class Connection implements Runnable {
         }
     }
 
+    /**
+     * Send the client a notice message.
+     * @param message String message to send to the client
+     */
     public void sendNotice(String message) {
         send(":" + globalServerName + " NOTICE " + userConfig.getNick() + " :" + message);
     }
 
+    /**
+     * @return String of the nicks host mask
+     */
     public String getRepresentation() {
         return userConfig.getNick() + "!" + userConfig.getUsername() + "@" + getHost();
     }
 
-    public void sendGlobal(String message) {
-        send(":" + globalServerName + " " + message); }
+    public void sendGlobal(String message) { send(":" + globalServerName + " " + message); }
 
+    /**
+     * Respond with a 401 that the nick or channel do not exist
+     */
+    public void noSuchNickChannel() { send("401 " + getUserConfig().getNick() + " :No such nick/channel"); }
+
+    /**
+     * @param line Line to run a command against
+     */
     private void parse(String line) {
         System.out.println("<< " + line);
         String[] arguments = line.split(" ");
