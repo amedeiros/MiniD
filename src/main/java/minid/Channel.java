@@ -29,10 +29,10 @@ public class Channel {
     public void removeMember(Connection connection) { members.remove(connection.getUserConfig().getNick()); }
     public void removeMember(String nick) { members.remove(nick); }
 
-    public void changeMember(Connection connection, String oldNick) {
+    public void changeMember(Connection connection, String oldNick, String oldRepresentation) {
         removeMember(oldNick);
         members.put(connection.getUserConfig().getNick(), connection);
-        msgMembers(":" + oldNick + " NICK " + connection.getUserConfig().getNick());
+        msgMembers(":" + oldRepresentation + " NICK " + connection.getUserConfig().getNick());
     }
 
     public void sendTopic(Connection connection) {

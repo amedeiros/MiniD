@@ -18,15 +18,14 @@ public enum Commands implements Command {
             } else if (connection.getUserConfig() != null && connection.getUserConfig().getNick() != null
                     && Connection.getGlobalConnections().containsKey(connection.getUserConfig().getNick())) {
                 // Changing name
-                String oldNick = connection.getUserConfig().getNick();
-//                String oldRepresentation = connection.getRepresentation();
+                String oldNick           = connection.getUserConfig().getNick();
+                String oldRepresentation = connection.getRepresentation();
                 Connection.getGlobalConnections().remove(connection.getUserConfig().getNick());
                 connection.getUserConfig().setNick(nick);
                 Connection.getGlobalConnections().put(nick, connection);
-//                connection.send(":" + oldRepresentation + " NICK " + nick);
                 connection.getUserConfig().getChannelList().forEach(channelName -> {
                     Channel channel = Channels.getGlobalChannel(channelName);
-                    channel.changeMember(connection, oldNick);
+                    channel.changeMember(connection, oldNick, oldRepresentation);
                 });
             }  else {
                 // New user
