@@ -43,6 +43,7 @@ public class Connection implements Runnable {
     /**
      * Run this connection thread
      */
+    @Override
     public void run() {
         // Also run a ping thread probably a better way to do this.
         this.pingPongThread = new Thread(new PingPong(this));
@@ -90,6 +91,7 @@ public class Connection implements Runnable {
             bufferedWriter.close();
             bufferedReader.close();
             socket.close();
+            if (!Thread.currentThread().isInterrupted()) Thread.currentThread().interrupt();
         } catch (IOException e) { e.printStackTrace(); }
     }
 

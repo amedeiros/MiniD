@@ -26,6 +26,15 @@ public class Channel {
         doList(connection);
     }
 
+    public void removeMember(Connection connection) { members.remove(connection.getUserConfig().getNick()); }
+    public void removeMember(String nick) { members.remove(nick); }
+
+    public void changeMember(Connection connection, String oldNick) {
+        removeMember(oldNick);
+        members.put(connection.getUserConfig().getNick(), connection);
+        msgMembers(":" + oldNick + " NICK " + connection.getUserConfig().getNick());
+    }
+
     public void sendTopic(Connection connection) {
         if (getTopic() == null)
             connection.send(String.format("352 %s %s :No topic is set", connection.getUserConfig().getNick(), name));

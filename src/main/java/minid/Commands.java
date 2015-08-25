@@ -10,21 +10,34 @@ import java.util.Arrays;
 public enum Commands implements Command {
     NICK() {
         @Override
-        public void run(Connection connection, String[] arguments) {
-            if (connection.getUserConfig().getNick() == null)
-                checkAndSetNick(arguments[1], connection);
-
-            // Auto Join #MiniD
-            String[] joinArguments = "JOIN #MiniD".split(" ");
-            Commands.JOIN.run(connection, joinArguments);
-        }
+        public void run(Connection connection, String[] arguments) { checkAndSetNick(arguments[1], connection); }
 
         private void checkAndSetNick(String nick, Connection connection) {
             if (Connection.getGlobalConnections().containsKey(nick) && Connection.getGlobalConnections().get(nick).active()) {
                 connection.send("433 " + nick + " :Nickname is already in use");
+            } else if (connection.getUserConfig() != null && connection.getUserConfig().getNick() != null
+                    && Connection.getGlobalConnections().containsKey(connection.getUserConfig().getNick())) {
+                // Changing name
+                String oldNick = connection.getUserConfig().getNick();
+//                String oldRepresentation = connection.getRepresentation();
+                Connection.getGlobalConnections().remove(connection.getUserConfig().getNick());
+                connection.getUserConfig().setNick(nick);
+                Connection.getGlobalConnections().put(nick, connection);
+//                connection.send(":" + oldRepresentation + " NICK " + nick);
+                connection.getUserConfig().getChannelList().forEach(channelName -> {
+                    Channel channel = Channels.getGlobalChannel(channelName);
+                    channel.changeMember(connection, oldNick);
+                });
             }  else {
+                // New user
                 Connection.getGlobalConnections().put(nick, connection);
                 connection.getUserConfig().setNick(nick);
+
+                // Auto Join #MiniD
+                if (!Channels.getGlobalChannel("#MiniD").containsMember(nick)) {
+                    String[] joinArguments = "JOIN #MiniD".split(" ");
+                    Commands.JOIN.run(connection, joinArguments);
+                }
             }
         }
     },
