@@ -11,9 +11,9 @@ public enum Commands implements Command {
     NICK() {
         @Override
         public void run(Connection connection, String[] arguments) {
-            if (connection.getUserConfig().getNick() == null) {
+            if (connection.getUserConfig().getNick() == null)
                 checkAndSetNick(arguments[1], connection);
-            }
+
             // Auto Join #MiniD
             String[] joinArguments = "JOIN #MiniD".split(" ");
             Commands.JOIN.run(connection, joinArguments);
@@ -75,9 +75,9 @@ public enum Commands implements Command {
             if (arguments.length >= 3) {
                 if (Connection.getGlobalConnections().containsKey(target)) {
                     Connection.getGlobalConnections().get(target).send(":" + connection.getUserConfig().getNick() + " PRIVMSG " + target + " " + Helper.join(Arrays.copyOfRange(arguments, 2, arguments.length), " "));
-                } else if (Channel.getGlobalChannels().containsKey(target)) {
-                    if (Channel.getGlobalChannels().get(target).containsMember(connection.getUserConfig().getNick())) {
-                        Channel.getGlobalChannels().get(target).msgMembers(":" + connection.getUserConfig().getNick() + " PRIVMSG " + target + " " + Helper.join(Arrays.copyOfRange(arguments, 2, arguments.length), " "), connection);
+                } else if (Channels.getGlobalChannels().containsKey(target)) {
+                    if (Channels.getGlobalChannels().get(target).containsMember(connection.getUserConfig().getNick())) {
+                        Channels.getGlobalChannels().get(target).msgMembers(":" + connection.getUserConfig().getNick() + " PRIVMSG " + target + " " + Helper.join(Arrays.copyOfRange(arguments, 2, arguments.length), " "), connection);
                     } else {
                         connection.sendNotice("You can not send messages to a channel you are not a member of.");
                     }
@@ -102,8 +102,8 @@ public enum Commands implements Command {
         public void run(Connection connection, String[] arguments) {
             String channelName = arguments[1];
             if (channelName.startsWith("#")) {
-                if (Channel.getGlobalChannels().containsKey(channelName)) {
-                    Channel channel = Channel.getGlobalChannels().get(channelName);
+                if (Channels.globalChannelExists(channelName)) {
+                    Channel channel = Channels.getGlobalChannel(channelName);
                     if (channel.containsMember(connection.getUserConfig().getNick()) && connection.getUserConfig().getChannelList().contains(channelName)) {
                         connection.sendNotice("You are already a member of that channel.");
                     } else {
@@ -113,8 +113,8 @@ public enum Commands implements Command {
                 } else {
                     Channel newChannel = new Channel();
                     newChannel.setName(channelName);
-                    Channel.getGlobalChannels().put(channelName, newChannel);
                     newChannel.addMember(connection);
+                    Channels.addGlobalChannel(channelName, newChannel);
                 }
             } else { connection.sendNotice("This server requires channels to begin with #"); }
         }
@@ -124,8 +124,8 @@ public enum Commands implements Command {
         @Override
         public void run(Connection connection, String[] arguments) {
             String channel = arguments[1];
-            if (Channel.getGlobalChannels().containsKey(channel))
-                connection.sendGlobal("MODE " + Channel.getGlobalChannels().get(channel).getName() + " +nt");
+            if (Channels.globalChannelExists(channel))
+                connection.sendGlobal("MODE " + Channels.getGlobalChannel(channel).getName() + " +nt");
             else
                 connection.noSuchNickChannel();
         }
@@ -142,10 +142,10 @@ public enum Commands implements Command {
         @Override
         public void run(Connection connection, String[] arguments) {
             String channelName = arguments[1];
-            if (Channel.getGlobalChannels().containsKey(channelName)) {
-                Channel channel = Channel.getGlobalChannels().get(channelName);
+            if (Channels.globalChannelExists(channelName)) {
+                Channel channel = Channels.getGlobalChannel(channelName);
                 if (arguments.length <= 2) { // Return the topic
-                    Channel.getGlobalChannels().get(channelName).sendTopic(connection);
+                    channel.sendTopic(connection);
                 } else if (arguments.length > 2) { // Set the topic
                     String topic = Helper.join(Arrays.copyOfRange(arguments, 2, arguments.length), " ");
                     if (topic.startsWith(":")) topic = topic.replaceFirst(":", "");
@@ -168,8 +168,8 @@ public enum Commands implements Command {
         public void run(Connection connection, String[] arguments) {
             if (arguments.length == 2) {
                 String channelName = arguments[1];
-                if (Channel.getGlobalChannels().containsKey(channelName))
-                    Channel.getGlobalChannels().get(channelName).doList(connection);
+                if (Channels.getGlobalChannels().containsKey(channelName))
+                    Channels.getGlobalChannels().get(channelName).doList(connection);
                 else
                     connection.noSuchNickChannel();
             } else { connection.noSuchNickChannel(); }

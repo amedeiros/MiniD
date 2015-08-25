@@ -25,7 +25,7 @@ public class Server implements Runnable {
         Channel minid = new Channel();
         minid.setTopic("Default channel for MiniD");
         minid.setName("#MiniD");
-        Channel.getGlobalChannels().put(minid.getName(), minid);
+        Channels.getGlobalChannels().put(minid.getName(), minid);
 
         this.serverConfig = serverConfig;
         this.serverSocket = new ServerSocket(serverConfig.getPort());

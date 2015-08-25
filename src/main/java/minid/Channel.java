@@ -7,12 +7,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by Andrew Medeiros on 5/1/15.
  */
 public class Channel {
-    private static ConcurrentHashMap<String, Channel> globalChannels = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String, Connection> members = new ConcurrentHashMap<>();
     private String topic;
     private String name;
-
-    public static ConcurrentHashMap<String, Channel> getGlobalChannels() { return globalChannels; }
 
     public void setTopic(String topic) { this.topic = topic; }
     public String getTopic() { return topic; }

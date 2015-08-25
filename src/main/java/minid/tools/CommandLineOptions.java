@@ -8,10 +8,8 @@ import org.apache.commons.cli.Options;
 public class CommandLineOptions {
     private static Options options = null;
 
-    public static Options getOptions() {
-        if (options == null)
-            synchronized (Options.class) { setOptions(); }
-
+    public static synchronized Options getOptions() {
+        if (options == null) { setOptions(); }
         return options;
     }
 
