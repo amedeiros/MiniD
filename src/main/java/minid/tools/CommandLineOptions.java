@@ -6,14 +6,11 @@ import org.apache.commons.cli.Options;
  * Created by Andrew Medeiros on 4/30/15.
  */
 public class CommandLineOptions {
-    private static Options options = null;
+    private static Options options = setOptions();
 
-    public static synchronized Options getOptions() {
-        if (options == null) { setOptions(); }
-        return options;
-    }
+    public static Options getOptions() { return options; }
 
-    private static void setOptions() {
+    private static Options setOptions() {
         options = new Options();
 
         // Add the port option
@@ -27,5 +24,7 @@ public class CommandLineOptions {
 
         // Add the username option
         options.addOption("username", true, "Username you are connecting with");
+
+        return options;
     }
 }
