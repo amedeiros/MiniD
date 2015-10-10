@@ -5,6 +5,7 @@ import minid.configuration.ServerConfig;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
+import javax.net.ssl.SSLServerSocketFactory;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -21,16 +22,12 @@ public class Server implements Runnable {
     private ServerConfig serverConfig;
 
     public Server(ServerConfig serverConfig) throws Exception {
-        // Create a default channel
-        Channel minid = new Channel();
-        minid.setTopic("Default channel for MiniD");
-        minid.setName("#MiniD");
-        Channels.getGlobalChannels().put(minid.getName(), minid);
-
+        setDefaultChannel();
         this.serverConfig = serverConfig;
         this.serverSocket = new ServerSocket(serverConfig.getPort());
     }
 
+    @Override
     public void run() {
         while (serverSocket.isBound()) {
             try {
@@ -41,5 +38,13 @@ public class Server implements Runnable {
                 break;
             }
         }
+    }
+
+    private void setDefaultChannel() {
+        // Create a default channel
+        Channel minid = new Channel();
+        minid.setTopic("Default channel for MiniD");
+        minid.setName("#MiniD");
+        Channels.getGlobalChannels().put(minid.getName(), minid);
     }
 }

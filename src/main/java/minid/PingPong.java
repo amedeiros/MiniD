@@ -9,6 +9,7 @@ public class PingPong implements Runnable {
     private Connection connection;
     public PingPong(Connection connection) { this.connection = connection; }
 
+    @Override
     public void run() {
         while(connection.active()) {
             try {
@@ -17,9 +18,7 @@ public class PingPong implements Runnable {
             } catch (InterruptedException e) {
                 // NO-OP
             } finally {
-                if (!connection.isPlayingPingPong) {
-                    connection.close();
-                }
+                if (!connection.isPlayingPingPong) connection.close();
             }
         }
     }

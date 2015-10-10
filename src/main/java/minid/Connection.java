@@ -103,7 +103,7 @@ public class Connection implements Runnable {
         try {
             bufferedWriter.write(message + "\r\n");
             bufferedWriter.flush();
-            System.out.println(">> " + message);
+            LOG.info(">> " + message);
         } catch (IOException e) { LOG.debug(e); }
     }
 
@@ -133,7 +133,7 @@ public class Connection implements Runnable {
      * @param line Line to run a command against
      */
     private void parse(String line) {
-        System.out.println("<< " + line);
+        LOG.info("<< " + line);
         String[] arguments = line.split(" ");
         if (line.startsWith("NICK"))         Commands.NICK.run(this, arguments);
         else if (line.startsWith("USER"))    Commands.USER.run(this, arguments);
