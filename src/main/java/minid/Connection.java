@@ -22,7 +22,7 @@ public class Connection implements Runnable {
 
     private static final Logger LOG = LogManager.getLogger(Server.class);
     private static ConcurrentHashMap<String, Connection> globalConnections = new ConcurrentHashMap<>();
-    public static String globalServerName = "Programming-Mother-Fucker";
+    public static String globalServerName = "A MiniD Production";
 
     /**
      * @param socket Socket to run in a separate thread
