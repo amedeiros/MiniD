@@ -1,54 +1,35 @@
-apply plugin: 'java'
-apply plugin: 'groovy'
-apply plugin: 'application'
+plugins {
+    id 'groovy'
+    id 'codenarc'
+    id 'application'
+}
 
 sourceCompatibility = 1.8
+group               = 'minid'
 mainClassName       = 'minid.MiniD'
 version             = '1.0'
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
-sourceSets {
-    main {
-        java.srcDir file('src/main/java')
-        resources.srcDir file('src/main/resources')
-    }
-    test {
-        resources.srcDir file('src/test/resources')
-        groovy.srcDir    file('src/test/groovy')
-    }
+codenarc {
+    configFile = new File('config/codenarc/codenarc.groovy')
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-    compile group: 'commons-cli', name: 'commons-cli', version: '1.2'
-    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.2'
-    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.2'
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+
+    compile 'org.codehaus.groovy:groovy-all:2.4.4'
+    compile 'commons-cli:commons-cli:1.3.1'
+    compile 'org.apache.logging.log4j:log4j-api:2.5'
+    compile 'org.apache.logging.log4j:log4j-core:2.5'
 }
 
 configurations {
     provided
     compile.extendsFrom provided
     markdownDoclet
-}
-
-jar {
-    baseName 'MiniD'
-    manifest {
-        attributes 'Main-Class': 'minid.MiniD'
-    }
-    dependsOn configurations.runtime
-    from {
-        (configurations.runtime - configurations.provided).collect {
-            it.isDirectory() ? it : zipTree(it)
-        }
-    }
-
-    {
-        exclude 'META-INF/*.SF'
-        exclude 'META-INF/*.DSA'
-        exclude 'META-INF/*.RSA'
-    }
 }

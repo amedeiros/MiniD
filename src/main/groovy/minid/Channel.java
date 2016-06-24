@@ -26,6 +26,11 @@ public class Channel {
         doList(connection);
     }
 
+    public Channel withMember(Connection connection) {
+        addMember(connection);
+        return this;
+    }
+
     public void removeMember(Connection connection) { members.remove(connection.getUserConfig().getNick()); }
     public void removeMember(String nick) { members.remove(nick); }
 
